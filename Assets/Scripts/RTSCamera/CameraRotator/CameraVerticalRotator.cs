@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraVerticalRotator : CameraRotator
 {
-    float _xRotation;
+    private float _xRotation;
 
     private void Start()
     {

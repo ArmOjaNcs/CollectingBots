@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CameraZoom : PauseableObject
+public class CameraZoom : CameraPauseableComponent
 {
     [SerializeField] private Camera _camera;
     [SerializeField] private CameraInput _input;
@@ -13,9 +13,8 @@ public class CameraZoom : PauseableObject
     private float _currentZoom;
     private bool _isOrthographic;
 
-    private protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         _orthographic = new OrthographicCameraZoomHandler(_camera, _zoomProperties);
         _perspective = new PerspectiveCameraZoomHandler(_camera, _zoomProperties);
         _orthographicToggle.onValueChanged.AddListener(ChangeCameraProjection);

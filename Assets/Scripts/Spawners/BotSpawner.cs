@@ -1,9 +1,11 @@
 using UnityEngine;
+using Zenject;
 
 public class BotSpawner : MonoBehaviour
 {
     [SerializeField] private Bot _botPrefab;
     [SerializeField] private int _maxCapacity;
+    [Inject] private Pause _pause;
 
     private ObjectPool<Bot> _pool;
 
@@ -12,13 +14,19 @@ public class BotSpawner : MonoBehaviour
         _pool = new ObjectPool<Bot>(_botPrefab, _maxCapacity, transform);
     }
 
-    public Bot SpawnBot(BaseFacility baseFacility)
+    public Bot SpawnBot(BaseStructure baseStructure)
     {
         Bot spawnedBot = _pool.GetElement();
-        spawnedBot.transform.position = new Vector3(baseFacility.transform.position.x + 
-            baseFacility.Collider.bounds.extents.x, 0, 0);
+
+        if(spawnedBot.IsInitialized == false)
+        {
+           _pause.Register(spawnedBot);
+            spawnedBot.SetInitialized();
+        }
+
+        spawnedBot.transform.position = new Vector3(baseStructure.transform.position.x + baseStructure.Collider.bounds.extents.x, 0, 0);
         spawnedBot.gameObject.SetActive(true);
-        spawnedBot.SetBaseFacility(baseFacility);
+        spawnedBot.SetBaseStructure(baseStructure);
         return spawnedBot;
     }
 }

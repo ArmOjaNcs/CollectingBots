@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class CameraRotator : PauseableObject
+public abstract class CameraRotator : CameraPauseableComponent
 {
     [SerializeField] private CameraInput _input;
     [SerializeField] private Slider _speedSlider;

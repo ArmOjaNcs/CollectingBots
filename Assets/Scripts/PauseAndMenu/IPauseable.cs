@@ -2,5 +2,4 @@ public interface IPauseable
 {
     public void Stop();
     public void Resume();
-    public void Register(IPauseable pauseable);
 }

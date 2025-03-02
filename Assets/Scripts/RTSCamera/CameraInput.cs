@@ -11,14 +11,14 @@ public class CameraInput : PauseableObject
     public event Action<float> VerticalRotationChanged;
     public event Action<float> ZoomChanged;
 
-    private bool _isRotate => Input.GetMouseButton(2);
-    private float _scrollWheel => Input.GetAxis(CameraUtils.MouseScrollWheel);
-    private float _horizontalDirection => Input.GetAxis(CameraUtils.Horizontal);
-    private float _verticalDirection => Input.GetAxis(CameraUtils.Vertical);
-    private float _horizontalRotation => Input.GetAxis(CameraUtils.MouseX);
-    private float _verticalRotation => Input.GetAxis(CameraUtils.MouseY);
-    private float _mousePositionX => Input.mousePosition.x;
-    private float _mousePositionY => Input.mousePosition.y;
+    private bool IsStartRotate => Input.GetMouseButton(2);
+    private float ScrollWheel => Input.GetAxis(CameraUtils.MouseScrollWheel);
+    private float HorizontalDirection => Input.GetAxis(CameraUtils.Horizontal);
+    private float VerticalDirection => Input.GetAxis(CameraUtils.Vertical);
+    private float HorizontalRotation => Input.GetAxis(CameraUtils.MouseX);
+    private float VerticalRotation => Input.GetAxis(CameraUtils.MouseY);
+    private float MousePositionX => Input.mousePosition.x;
+    private float MousePositionY => Input.mousePosition.y;
 
     private void Update()
     {
@@ -28,7 +28,7 @@ public class CameraInput : PauseableObject
             ReadMousePosition();
             ReadZoomAxis();
 
-            if (_isRotate)
+            if (IsStartRotate)
             {
                 IsRotate?.Invoke(true);
                 ReadHorizontalRotation();
@@ -43,51 +43,51 @@ public class CameraInput : PauseableObject
 
     private void ReadKeyboardAxis()
     {
-        Vector3 direction = new Vector3(_horizontalDirection, _verticalDirection, 0) * _cameraZoomInput.GetCurrentZoom();
+        Vector3 direction = new Vector3(HorizontalDirection, VerticalDirection, 0) * _cameraZoomInput.GetCurrentZoom();
         DirectionChanged?.Invoke(direction);
     }
 
     private void ReadHorizontalRotation()
     {
-        float horizontalRotation = _horizontalRotation * _cameraZoomInput.GetCurrentZoom();
+        float horizontalRotation = HorizontalRotation * _cameraZoomInput.GetCurrentZoom();
         HorizontalRotationChanged?.Invoke(horizontalRotation);
     }
 
     private void ReadVerticalRotation()
     {
-        float verticalRotation = _verticalRotation * _cameraZoomInput.GetCurrentZoom();
+        float verticalRotation = VerticalRotation * _cameraZoomInput.GetCurrentZoom();
         VerticalRotationChanged?.Invoke(verticalRotation);
     }
 
     private void ReadZoomAxis()
     {
-        ZoomChanged?.Invoke(_scrollWheel);
+        ZoomChanged?.Invoke(ScrollWheel);
     }
 
     private void ReadMousePosition()
     {
-        if (_mousePositionY >= Screen.height - CameraUtils.PanBorderThickness)
+        if (MousePositionY >= Screen.height - CameraUtils.PanBorderThickness)
             MoveByMouseVertical(CameraUtils.PositiveMouse);
 
-        if (_mousePositionY <= CameraUtils.PanBorderThickness)
+        if (MousePositionY <= CameraUtils.PanBorderThickness)
             MoveByMouseVertical(CameraUtils.NegativeMouse);
 
-        if (_mousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
+        if (MousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
             MoveByMouseHorizontal(CameraUtils.PositiveMouse);
 
-        if(_mousePositionX <= CameraUtils.PanBorderThickness)
+        if(MousePositionX <= CameraUtils.PanBorderThickness)
             MoveByMouseHorizontal(CameraUtils.NegativeMouse);
 
-        if (_mousePositionY >= Screen.height - CameraUtils.PanBorderThickness && _mousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
+        if (MousePositionY >= Screen.height - CameraUtils.PanBorderThickness && MousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
             MoveByMouseDiagonal(CameraUtils.PositiveMouse, CameraUtils.PositiveMouse);
 
-        if (_mousePositionY >= Screen.height - CameraUtils.PanBorderThickness && _mousePositionX <= CameraUtils.PanBorderThickness)
+        if (MousePositionY >= Screen.height - CameraUtils.PanBorderThickness && MousePositionX <= CameraUtils.PanBorderThickness)
             MoveByMouseDiagonal(CameraUtils.NegativeMouse, CameraUtils.PositiveMouse);
 
-        if (_mousePositionY <= CameraUtils.PanBorderThickness && _mousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
+        if (MousePositionY <= CameraUtils.PanBorderThickness && MousePositionX >= Screen.width - CameraUtils.PanBorderThickness)
             MoveByMouseDiagonal(CameraUtils.PositiveMouse, CameraUtils.NegativeMouse);
 
-        if (_mousePositionY <= CameraUtils.PanBorderThickness && _mousePositionX <= CameraUtils.PanBorderThickness)
+        if (MousePositionY <= CameraUtils.PanBorderThickness && MousePositionX <= CameraUtils.PanBorderThickness)
             MoveByMouseDiagonal(CameraUtils.NegativeMouse, CameraUtils.NegativeMouse);
     }
 

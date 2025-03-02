@@ -1,17 +1,17 @@
+using System;
 using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    public bool IsPicked {  get; private set; }
+    public event Action<Resource> Released;
 
     private void OnEnable()
     {
-        IsPicked = false;
         transform.parent = null;
     }
 
-    public void Pick()
+    public void Release()
     {
-        IsPicked = true;
+        Released?.Invoke(this);
     }
 }

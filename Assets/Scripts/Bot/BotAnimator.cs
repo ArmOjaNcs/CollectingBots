@@ -6,9 +6,8 @@ public class BotAnimator : PauseableObject
 
     private Bot _bot;
 
-    private protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         _bot = GetComponent<Bot>();
     }
 

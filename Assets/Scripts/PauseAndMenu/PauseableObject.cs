@@ -1,18 +1,8 @@
 using UnityEngine;
 
-public class PauseableObject : MonoBehaviour, IPauseable
+public abstract class PauseableObject : MonoBehaviour, IPauseable
 {
     private protected bool IsPaused;
-
-    private protected virtual void Awake()
-    {
-        Register(this);
-    }
-
-    public void Register(IPauseable pauseable)
-    {
-        Pause.Register(pauseable);
-    }
 
     public virtual void Stop()
     {

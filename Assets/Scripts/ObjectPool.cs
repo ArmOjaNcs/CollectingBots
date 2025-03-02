@@ -15,7 +15,7 @@ public class ObjectPool<T> where T : MonoBehaviour
 
     public Transform Container { get; }
 
-    public bool HasFreeElement(out T element)
+    public bool TryGetFreeElement(out T element)
     {
         foreach(T freeElement in _pool)
         {
@@ -32,7 +32,7 @@ public class ObjectPool<T> where T : MonoBehaviour
 
     public T GetElement()
     {
-        if(HasFreeElement(out T element))
+        if(TryGetFreeElement(out T element))
             return element;
 
         return CreateObject();

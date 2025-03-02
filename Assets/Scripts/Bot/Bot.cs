@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class Bot : PauseableObject
+public class Bot : ObjectToSpawn
 {
     [SerializeField] private Transform _grabPoint;
 
-    private BaseFacility _baseFacility;
+    private BaseStructure _baseSructure;
     private Resource _currentResourceTarget;
     private Resource _resourceOnDeliver;
     private NavMeshAgent _agent;
@@ -20,10 +20,8 @@ public class Bot : PauseableObject
 
     public bool IsBusy { get; private set; }
 
-    private protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-
         _agent = GetComponent<NavMeshAgent>();
         _agent.updateRotation = true;
         _agent.updatePosition = true;
@@ -41,13 +39,13 @@ public class Bot : PauseableObject
         if (IsPaused == false)
         {
             RecalculateDistanceToCurrentResource();
-            RecalculateDistanceToBaseFacility();
+            RecalculateDistanceToBaseStructure();
         }
     }
 
-    public void SetBaseFacility(BaseFacility currentBaseFacility)
+    public void SetBaseStructure(BaseStructure currentBaseStructure)
     {
-        _baseFacility = currentBaseFacility;
+        _baseSructure = currentBaseStructure;
     }
 
     public void SetCurrentResourceDestination(Resource resource)
@@ -67,6 +65,7 @@ public class Bot : PauseableObject
             _velocity = _agent.velocity;
             _agent.velocity = Vector3.zero;
             _agent.isStopped = true;
+            StopRide?.Invoke();
         }
     }
 
@@ -77,7 +76,10 @@ public class Bot : PauseableObject
             _agent.velocity = _velocity;
 
             if (_isDelivered == false)
+            {
                 _agent.isStopped = false;
+                Ride?.Invoke();
+            }
         }
     }
 
@@ -93,21 +95,20 @@ public class Bot : PauseableObject
                 _currentResourceTarget.transform.SetParent(_grabPoint);
                 _resourceOnDeliver = _currentResourceTarget;
                 _currentResourceTarget = null;
-                SetBaseFacilityDestination();
+                SetBaseStructureDestination();
             }
         }
     }
 
-    private void RecalculateDistanceToBaseFacility()
+    private void RecalculateDistanceToBaseStructure()
     {
         if (_resourceOnDeliver != null)
         {
-            _distance = transform.position - _baseFacility.transform.position;
+            _distance = transform.position - _baseSructure.transform.position;
 
-            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToBaseFacility, 2))
+            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToBaseStructure, 2))
             {
-                _resourceOnDeliver.transform.parent = null;
-                _baseFacility.CollectResource(_resourceOnDeliver);
+
                 ShipResource();
             }
         }
@@ -117,6 +118,8 @@ public class Bot : PauseableObject
     {
         if (IsBusy && _resourceOnDeliver != null)
         {
+            _resourceOnDeliver.transform.parent = null;
+            _baseSructure.CollectResource(_resourceOnDeliver);
             _agent.velocity = Vector3.zero;
             IsBusy = false;
             _agent.isStopped = true;
@@ -126,10 +129,10 @@ public class Bot : PauseableObject
         }
     }
 
-    private void SetBaseFacilityDestination()
+    private void SetBaseStructureDestination()
     {
         _agent.velocity = Vector3.zero;
         Ride?.Invoke();
-        _agent.destination = _baseFacility.transform.position;
+        _agent.destination = _baseSructure.transform.position;
     }
 }

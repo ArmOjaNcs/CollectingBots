@@ -1,20 +1,32 @@
 using UnityEngine;
+using Zenject;
 
 public class PauseInput : MonoBehaviour
 {
+    [Inject] private Pause _pause;
     private bool _isPaused;
+
+    private bool IsPauseButtonDown => Input.GetKeyDown(KeyCode.Escape);
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape) && _isPaused == false)
+        ReadPauseButton();
+    }
+
+    private void ReadPauseButton()
+    {
+        if (IsPauseButtonDown)
         {
-            Pause.Stop();
-            _isPaused = true;
-        }
-        else if(Input.GetKeyDown(KeyCode.Escape) && _isPaused == true)
-        {
-            Pause.Resume();
-            _isPaused = false;
+            if (_isPaused == false)
+            {
+                _pause.Stop();
+                _isPaused = true;
+            }
+            else
+            {
+                _pause.Resume();
+                _isPaused = false;
+            }
         }
     }
 }

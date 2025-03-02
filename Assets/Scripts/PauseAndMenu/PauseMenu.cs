@@ -1,21 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private UIAnimator _menu;
     [SerializeField] private List<UIAnimator> _subElements;
+    [Inject] private Pause _pause;
 
     private void OnEnable()
     {
-        Pause.IsPaused += OnPaused;
-        Pause.IsUnPaused += OnUnPaused;
+        _pause.IsPaused += OnPaused;
+        _pause.IsUnPaused += OnUnPaused;
     }
 
     private void OnDisable()
     {
-        Pause.IsPaused -= OnPaused;
-        Pause.IsUnPaused -= OnUnPaused;
+        _pause.IsPaused -= OnPaused;
+        _pause.IsUnPaused -= OnUnPaused;
     }
 
     private void OnPaused()
