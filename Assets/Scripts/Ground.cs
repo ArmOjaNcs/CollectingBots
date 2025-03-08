@@ -3,24 +3,25 @@ using UnityEngine;
 [RequireComponent(typeof(MeshCollider))]
 public class Ground : MonoBehaviour
 {
-    [SerializeField] private MeshCollider _ground;
+    [SerializeField] private MeshCollider _meshCollider;
 
     public float MinXPosition { get; private set; }
     public float MaxXPosition { get; private set; }
     public float MinZPosition { get; private set; }
     public float MaxZPosition { get; private set; }
+    public MeshCollider MeshCollider => _meshCollider;
 
     private void Awake()
     {
-        _ground = GetComponent<MeshCollider>();
+        _meshCollider = GetComponent<MeshCollider>();
         SetPositions();
     }
 
     private void SetPositions()
     {
-        MinXPosition = _ground.bounds.center.x - _ground.bounds.extents.x;
-        MaxXPosition = _ground.bounds.center.x + _ground.bounds.extents.x;
-        MinZPosition = _ground.bounds.center.z - _ground.bounds.extents.z;
-        MaxZPosition = _ground.bounds.center.z + _ground.bounds.extents.z;
+        MinXPosition = _meshCollider.bounds.center.x - _meshCollider.bounds.extents.x;
+        MaxXPosition = _meshCollider.bounds.center.x + _meshCollider.bounds.extents.x;
+        MinZPosition = _meshCollider.bounds.center.z - _meshCollider.bounds.extents.z;
+        MaxZPosition = _meshCollider.bounds.center.z + _meshCollider.bounds.extents.z;
     }
 }

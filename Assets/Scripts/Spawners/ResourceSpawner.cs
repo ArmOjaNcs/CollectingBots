@@ -1,23 +1,35 @@
 using UnityEngine;
 using Zenject;
+using System.Collections.Generic;
 
 public class ResourceSpawner : PauseableObject
 {
     [SerializeField] private Resource _resourcePrefab;
     [SerializeField] private int _maxCapacity;
     [SerializeField] private Ground _ground;
-    [Inject] Pause _pause;
+    [Inject] private Pause _pause;
 
+    private List<Vector3> _positions = new();
     private ObjectPool<Resource> _resourcePool;
     private Vector3 _resourceColliderSize;
     private float _timer;
     private int _currentResourcesCount;
+    private int _groundMask = 1 << GameUtils.Ground;
+    private int _layerWithoutGround;
 
     private void Awake()
     {
+        _layerWithoutGround = ~_groundMask;
         _resourcePool = new ObjectPool<Resource>(_resourcePrefab, _maxCapacity, transform);
         _resourceColliderSize = _resourcePrefab.GetComponent<BoxCollider>().size;
         _pause.Register(this);
+        SpawnPointFinder spawnPointFinder = new SpawnPointFinder();
+        float resourceDiameter = _resourceColliderSize.x * GameUtils.MultiplierForResourceDiameter;
+        _positions = spawnPointFinder.FindPlaceWithQuad(
+            _ground.MinXPosition + resourceDiameter / GameUtils.Half,
+            _ground.MinZPosition + resourceDiameter / GameUtils.Half,
+            _ground.MaxXPosition - resourceDiameter / GameUtils.Half, 
+            _ground.MaxZPosition - resourceDiameter / GameUtils.Half, resourceDiameter);
     }
 
     private void Update()
@@ -34,7 +46,9 @@ public class ResourceSpawner : PauseableObject
 
         if (TryGetSpawnPosition(_resourceColliderSize, out Vector3 availablePosition))
         {
+            availablePosition.y = _resourceColliderSize.x / GameUtils.Half;
             spawnedResource.transform.position = availablePosition;
+            spawnedResource.transform.Rotate(Vector3.up * Random.Range(0,GameUtils.FullAngleInDegrees));
             spawnedResource.gameObject.SetActive(true);
             spawnedResource.Released += ReleaseResource;
             return spawnedResource;
@@ -71,9 +85,10 @@ public class ResourceSpawner : PauseableObject
 
         while (protector > 0)
         {
-            Vector3 position = RandomPosition(resourceColliderSize);
+            int randomIndex = Random.Range(0, _positions.Count);
+            Vector3 position = _positions[randomIndex];
             Collider[] colliders = Physics.OverlapBox(position, resourceColliderSize,
-                Quaternion.identity, LayerMask.NameToLayer(GameUtils.Ground));
+                Quaternion.identity, _layerWithoutGround);
 
             if (colliders.Length == 0)
             {
@@ -86,14 +101,5 @@ public class ResourceSpawner : PauseableObject
 
         availablePosition = Vector3.zero;
         return false;
-    }
-
-    private Vector3 RandomPosition(Vector3 resourceColliderSize)
-    {
-        return new Vector3(Random.Range(_ground.MinXPosition + resourceColliderSize.x / GameUtils.Half,
-                    _ground.MaxXPosition - resourceColliderSize.x / GameUtils.Half),
-                    0 + resourceColliderSize.y / GameUtils.Half,
-                    Random.Range(_ground.MinZPosition + resourceColliderSize.z / GameUtils.Half,
-                    _ground.MaxZPosition - resourceColliderSize.z / GameUtils.Half));
     }
 }

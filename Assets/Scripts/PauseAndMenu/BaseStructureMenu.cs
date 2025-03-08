@@ -1,36 +1,61 @@
-using System.Collections;
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using Zenject;
 
-public class BaseStructureView : MonoBehaviour
+public class BaseStructureMenu : PauseableObject
 {
-    [SerializeField] private BaseStructure _baseStructure;
     [SerializeField] private UIAnimator _animator;
+    [SerializeField] private Button _buildNewBase;
     [SerializeField] private TextMeshProUGUI _collectedResourceCount;
     [SerializeField] private TextMeshProUGUI _availableResourceCount;
-    [SerializeField] private TextMeshProUGUI _botStatus;
+    [SerializeField] private CanvasGroup _canvasGroup;
+    [Inject] Pause _pause;
 
-    private WaitForSeconds _showTime;
+    private BaseStructure _baseStructure;
+
+    public event Action<BaseStructure> BuildInitiated;
 
     private void Awake()
     {
-        _showTime = new WaitForSeconds(GameUtils.TimeForMessage);
+        _pause.Register(this);
     }
 
     private void OnEnable()
     {
-        SetStartViewValue();
-        Subscribe();
+        _buildNewBase.onClick.AddListener(BuildNewBase);     
     }
 
     private void OnDisable()
     {
-        UnSubscribe();
+        _buildNewBase.onClick.RemoveListener(BuildNewBase);
     }
 
-    private void Start()
+    public override void Stop()
     {
-        ShowMenu();
+        _canvasGroup.interactable = false;
+    }
+
+    public override void Resume()
+    {
+        _canvasGroup.interactable = true;
+    }
+
+    public void SetBaseStructure(BaseStructure baseStructure)
+    {
+        if(_baseStructure != null)
+            UnSubscribe();
+
+        _baseStructure = baseStructure;
+
+        if (_baseStructure.IsCanBuild)
+            _buildNewBase.gameObject.SetActive(true);
+        else
+            _buildNewBase.gameObject.SetActive(false);
+
+        Subscribe();
+        SetStartViewValue();
     }
 
     public void ShowMenu()
@@ -47,21 +72,20 @@ public class BaseStructureView : MonoBehaviour
     {
         SetCollectedResourcesCount(_baseStructure.CollectedResourcesCount);
         SetAvailableResourcesCount(_baseStructure.AvailableResourcesCount);
-        SetBotStatus("");
     }
 
     private void Subscribe()
     {
         _baseStructure.CollectedResourcesCountChanged += SetCollectedResourcesCount;
         _baseStructure.AvailableResourcesCountChanged += SetAvailableResourcesCount;
-        _baseStructure.BotStatusChanged += SetBotStatus;
+        _baseStructure.NewBaseAcceptedToBuild += OnNewBaseAcceptedToBuild;
     }
 
     private void UnSubscribe()
     {
         _baseStructure.CollectedResourcesCountChanged -= SetCollectedResourcesCount;
         _baseStructure.AvailableResourcesCountChanged -= SetAvailableResourcesCount;
-        _baseStructure.BotStatusChanged -= SetBotStatus;
+        _baseStructure.NewBaseAcceptedToBuild -= OnNewBaseAcceptedToBuild;
     }
 
     private void SetCollectedResourcesCount(int collectedResourceCount)
@@ -74,15 +98,13 @@ public class BaseStructureView : MonoBehaviour
         _availableResourceCount.text = GameUtils.AvailableResourcesText + availableResourceCount.ToString();
     }
 
-    private void SetBotStatus(string status)
+    private void OnNewBaseAcceptedToBuild()
     {
-        StartCoroutine(ShowBotStatus(status));
+        _buildNewBase.gameObject.SetActive(false);
     }
 
-    private IEnumerator ShowBotStatus(string status)
+    private void BuildNewBase()
     {
-        _botStatus.text = status;
-        yield return _showTime;
-        _botStatus.text = "";
+        BuildInitiated?.Invoke(_baseStructure);
     }
 }

@@ -11,8 +11,6 @@ public class BaseStructureAnimator : ObjectToSpawn
     private bool _isBuildStarted;
 
     public event Action<BaseStructureAnimator> AnimatorFinished;
-    
-    public BaseStructure CurrentBaseStructure {  get; private set; }
 
     private void Awake()
     {
@@ -27,30 +25,29 @@ public class BaseStructureAnimator : ObjectToSpawn
         _currentBuildTime = 0;
         _buildRoutine = null;
         _isBuildStarted = false;
-        CurrentBaseStructure = null;
     }
 
     public override void Stop()
     {
-        _sequence.Pause();
-
         if (_buildRoutine != null && isActiveAndEnabled)
+        {
+            _sequence.Pause();
             StopCoroutine(_buildRoutine);
+        }
     }
 
     public override void Resume()
     {
-        _sequence.Play();
-
         if (_currentBuildTime < GameUtils.BaseStructureTimeToBuild && _isBuildStarted && isActiveAndEnabled)
+        {
+            _sequence.Play();
             _buildRoutine = StartCoroutine(WaitForBuild(GameUtils.BaseStructureTimeToBuild));
+        }       
     }
 
-    public void BuildStructure(BaseStructure baseStructure)
+    public void BuildStructure()
     {
-        transform.position = baseStructure.transform.position;
-        CurrentBaseStructure = baseStructure;
-        _sequence.Play();
+        _sequence.Restart();
         _buildRoutine = StartCoroutine(WaitForBuild(GameUtils.BaseStructureTimeToBuild));
         _isBuildStarted = true;
     }

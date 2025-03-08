@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(BoxCollider))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class Bot : ObjectToSpawn
 {
@@ -13,10 +14,12 @@ public class Bot : ObjectToSpawn
     private NavMeshAgent _agent;
     private Vector3 _velocity;
     private Vector3 _distance;
+    private BaseStructureBuildView _baseStructureBuildView;
     private bool _isDelivered;
 
     public event Action Ride;
     public event Action StopRide;
+    public event Action<Bot> BuildStarted;
 
     public bool IsBusy { get; private set; }
 
@@ -26,6 +29,7 @@ public class Bot : ObjectToSpawn
         _agent.updateRotation = true;
         _agent.updatePosition = true;
         _agent.autoRepath = true;
+        _agent.updateUpAxis = true;
     }
 
     private void OnEnable()
@@ -38,8 +42,12 @@ public class Bot : ObjectToSpawn
     {
         if (IsPaused == false)
         {
+            if(IsBusy)
+                _agent.Move(transform.forward * Time.deltaTime);
+
             RecalculateDistanceToCurrentResource();
             RecalculateDistanceToBaseStructure();
+            RecalculateDistanceToBuildNewBase();
         }
     }
 
@@ -48,11 +56,33 @@ public class Bot : ObjectToSpawn
         _baseSructure = currentBaseStructure;
     }
 
-    public void SetCurrentResourceDestination(Resource resource)
+    public void SetUnBusy()
+    {
+        _agent.velocity = Vector3.zero;
+        IsBusy = false;
+        _baseStructureBuildView = null;
+        _agent.isStopped = true;
+        _resourceOnDeliver = null;
+        _isDelivered = true;
+    }
+
+    public void SetBusy()
     {
         _isDelivered = false;
         _agent.isStopped = false;
         IsBusy = true;
+    }
+
+    public void FollowToBuildNewBase(BaseStructureBuildView baseStructureBuildView)
+    {
+        Ride?.Invoke();
+        _baseStructureBuildView = baseStructureBuildView;
+        _agent.destination = baseStructureBuildView.transform.position;
+    }
+
+    public void SetCurrentResourceDestination(Resource resource)
+    {
+        SetBusy();
         Ride?.Invoke();
         _currentResourceTarget = resource;
         _agent.destination = resource.transform.position;
@@ -62,6 +92,7 @@ public class Bot : ObjectToSpawn
     {
         if (gameObject.activeInHierarchy)
         {
+            base.Stop();
             _velocity = _agent.velocity;
             _agent.velocity = Vector3.zero;
             _agent.isStopped = true;
@@ -73,6 +104,7 @@ public class Bot : ObjectToSpawn
     {
         if (gameObject.activeInHierarchy)
         {
+            base.Resume();
             _agent.velocity = _velocity;
 
             if (_isDelivered == false)
@@ -89,7 +121,7 @@ public class Bot : ObjectToSpawn
         {
             _distance = transform.position - _currentResourceTarget.transform.position;
 
-            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToTarget, 2))
+            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToTarget, GameUtils.Quad))
             {
                 _currentResourceTarget.transform.position = _grabPoint.transform.position;
                 _currentResourceTarget.transform.SetParent(_grabPoint);
@@ -106,11 +138,8 @@ public class Bot : ObjectToSpawn
         {
             _distance = transform.position - _baseSructure.transform.position;
 
-            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToBaseStructure, 2))
-            {
-
+            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToBaseStructure, GameUtils.Quad))
                 ShipResource();
-            }
         }
     }
 
@@ -134,5 +163,21 @@ public class Bot : ObjectToSpawn
         _agent.velocity = Vector3.zero;
         Ride?.Invoke();
         _agent.destination = _baseSructure.transform.position;
+    }
+
+    private void RecalculateDistanceToBuildNewBase()
+    {
+        if (_baseStructureBuildView != null)
+        {
+            _distance = transform.position - _baseStructureBuildView.transform.position;
+
+            if (_distance.sqrMagnitude < Mathf.Pow(GameUtils.BotMinDistanceToBaseStructure, GameUtils.Quad) 
+                && _baseStructureBuildView.IsAccepted)
+            {
+                _baseStructureBuildView = null;
+                SetUnBusy();
+                BuildStarted?.Invoke(this);
+            }
+        }
     }
 }

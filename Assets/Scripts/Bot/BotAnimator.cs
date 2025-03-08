@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BotAnimator : PauseableObject
+public class BotAnimator : MonoBehaviour
 {
     [SerializeField] private Animator[] _wheels;
 
@@ -23,16 +23,6 @@ public class BotAnimator : PauseableObject
         _bot.StopRide -= OnStopRide;
     }
 
-    public override void Stop()
-    {
-        DisableWheelsAnimator();
-    }
-
-    public override void Resume()
-    {
-        EnableWheelsAnimator();
-    }
-
     private void OnRide()
     {
         foreach (Animator wheelAnimator in _wheels)
@@ -43,17 +33,5 @@ public class BotAnimator : PauseableObject
     {
         foreach (Animator wheelAnimator in _wheels)
             wheelAnimator.SetBool(GameUtils.BotAnimatorRide, false);
-    }
-
-    private void EnableWheelsAnimator()
-    {
-        foreach (Animator wheelAnimator in _wheels)
-            wheelAnimator.enabled = true;
-    }
-
-    private void DisableWheelsAnimator()
-    {
-        foreach (Animator wheelAnimator in _wheels)
-            wheelAnimator.enabled = false;
     }
 }

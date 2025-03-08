@@ -452,6 +452,7 @@ GameObject:
   - component: {fileID: 9119885343234822437}
   - component: {fileID: 619915154651481142}
   - component: {fileID: 4563044926882267463}
+  - component: {fileID: -7533424166536915446}
   m_Layer: 0
   m_Name: BotPrefab
   m_TagString: Untagged
@@ -468,7 +469,7 @@ Transform:
   m_GameObject: {fileID: 7882153435473389729}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -93.825745, y: 0.2403568, z: 18.622616}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 25, y: 25, z: 25}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -491,16 +492,16 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.05
   m_Speed: 10
-  m_Acceleration: 3
+  m_Acceleration: 10
   avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 1
+  m_AngularSpeed: 250
+  m_StoppingDistance: 2
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 0.05
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 5
   m_ObstacleAvoidanceType: 2
 --- !u!114 &619915154651481142
 MonoBehaviour:
@@ -532,6 +533,27 @@ MonoBehaviour:
   - {fileID: 1800965514092477609}
   - {fileID: 7780362136477860664}
   - {fileID: 8266658734497757208}
+--- !u!65 &-7533424166536915446
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7882153435473389729}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05284637, y: 0.04850804, z: 0.09430609}
+  m_Center: {x: 0.0009785438, y: 0.025087837, z: -0.0029062366}
 --- !u!1 &7903531745411747624
 GameObject:
   m_ObjectHideFlags: 0
