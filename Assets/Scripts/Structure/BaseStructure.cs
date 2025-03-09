@@ -9,15 +9,12 @@ public class BaseStructure : ObjectToSpawn
 
     private PickedResourcesHandler _pickedResourcesHandler;
     private List<Bot> _bots = new();
-    private List<Resource> _availableResources = new();
-    private Resource _nearestResource;
     private SpawnPointFinder _spawnPointFinder;
     private BoxCollider _collider;
     private float _nearestPosition = float.MaxValue;
     private float _timer;
     private bool _isBuilded;
     private bool _isNewBaseStructureNeeded;
-    private bool _isReadyToStart;
 
     public IReadOnlyList<Vector3> Positions = new List<Vector3>();
 
@@ -46,16 +43,12 @@ public class BaseStructure : ObjectToSpawn
         IsCanBuild = true;
         BotSendedToBuild = null;
         _scanner.gameObject.transform.position = transform.position;
-
-        if(_isReadyToStart)
-            FillSpawnPositions();
     }
 
     private void OnDisable()
     {
         CollectedResourcesCount = 0;
         AvailableResourcesCount = 0;
-        _isReadyToStart = true;
     }
 
     private void Update()
@@ -119,6 +112,7 @@ public class BaseStructure : ObjectToSpawn
     public void Build()
     {
         _isBuilded = true;
+        FillSpawnPositions();
     }
 
     public void SetNewBaseNeeded()
@@ -172,38 +166,38 @@ public class BaseStructure : ObjectToSpawn
 
     private void Scan()
     {
-        _availableResources.Clear();
-        _availableResources = _pickedResourcesHandler.GetAvailableResources(_scanner.ScanArea()).ToList();
-        AvailableResourcesCount = _availableResources.Count;
+        List<Resource> availableResources = new();
+        availableResources = _pickedResourcesHandler.GetAvailableResources(_scanner.ScanArea()).ToList();
+        AvailableResourcesCount = availableResources.Count;
         AvailableResourcesCountChanged?.Invoke(AvailableResourcesCount);
 
-        SendBot();
+        SendBot(availableResources);
     }
 
-    private void SendBot()
+    private void SendBot(List<Resource> availableResources)
     {
-        if (_availableResources.Count > 0)
+        if (availableResources.Count > 0)
         {
             Bot bot = GetFreeBot();
+            Resource nearestResource = null;
 
             if (bot != null && bot.isActiveAndEnabled)
             {
-                for (int i = 0; i < _availableResources.Count; i++)
+                for (int i = 0; i < availableResources.Count; i++)
                 {
-                    float distance = Vector3.Distance(_availableResources[i].transform.position, transform.position);
+                    float distance = Vector3.Distance(availableResources[i].transform.position, transform.position);
                    
                     if (distance < _nearestPosition)
                     {
                         _nearestPosition = distance;
-                        _nearestResource = _availableResources[i];
+                        nearestResource = availableResources[i];
                     }
                 }
 
-                bot.SetCurrentResourceDestination(_nearestResource);
-                _pickedResourcesHandler.AddPickedResource(_nearestResource);
+                bot.SetCurrentResourceDestination(nearestResource);
+                _pickedResourcesHandler.AddPickedResource(nearestResource);
                 AvailableResourcesCountChanged?.Invoke(--AvailableResourcesCount);
                 _nearestPosition = float.MaxValue;
-                _nearestResource = null;
             }
         }
     }
@@ -234,7 +228,7 @@ public class BaseStructure : ObjectToSpawn
 
     private void FillSpawnPositions()
     {
-        Positions = _spawnPointFinder.FindPlaceWithRing(transform.position, _collider.size.x, 
+        Positions = _spawnPointFinder.FindPlaceWithRing(transform.position, _collider.size.x,
             GameUtils.BotDiameter, GameUtils.RingRadius);
     }
 }

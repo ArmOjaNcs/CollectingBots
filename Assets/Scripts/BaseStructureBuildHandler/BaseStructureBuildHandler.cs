@@ -29,7 +29,7 @@ public class BaseStructureBuildHandler : MonoBehaviour
         _currentBaseStructureBuildView.gameObject.SetActive(true);
         _currentBaseStructure = baseStructure;
         _currentBaseStructure.SetNewBaseNeeded();
-        _currentBaseStructure.BuildNewBase += OnBuildNewBase; 
+        _currentBaseStructure.BuildNewBase += OnBuildNewBase;
         _buildInput.gameObject.SetActive(true);
     }
 
@@ -59,21 +59,19 @@ public class BaseStructureBuildHandler : MonoBehaviour
             _currentBaseStructureBuildView.transform.position = hit.point;
     }
 
-    private void OnRotateToLeft(bool isRotate)
+    private void OnRotateToLeft()
     {
-        if (isRotate)
-            _currentBaseStructureBuildView.transform.Rotate(Vector3.up * Time.deltaTime * GameUtils.BuildViewRotationSpeed);
+        _currentBaseStructureBuildView.transform.Rotate(Vector3.up * Time.deltaTime * GameUtils.BuildViewRotationSpeed);
     }
 
-    private void OnRotateToRight(bool isRotate)
+    private void OnRotateToRight()
     {
-        if (isRotate)
-            _currentBaseStructureBuildView.transform.Rotate(Vector3.up * Time.deltaTime * - GameUtils.BuildViewRotationSpeed);
+        _currentBaseStructureBuildView.transform.Rotate(Vector3.up * Time.deltaTime * -GameUtils.BuildViewRotationSpeed);
     }
 
     private void OnPlaced()
     {
-        if(_currentBaseStructureBuildView.IsCanBuild)
+        if (_currentBaseStructureBuildView.IsCanBuild)
         {
             _currentBaseStructureBuildView.AcceptPosition();
             _buildInput.gameObject.SetActive(false);

@@ -9,8 +9,8 @@ public class BuildInput : PauseableObject
     private Camera _camera;
 
     public event Action<Ray> RayChanged;
-    public event Action<bool> IsRotateToLeft;
-    public event Action<bool> IsRotateToRight;
+    public event Action IsRotateToLeft;
+    public event Action IsRotateToRight;
     public event Action Placed;
     public event Action Canceled;
 
@@ -40,14 +40,10 @@ public class BuildInput : PauseableObject
         RayChanged?.Invoke(ScreenPoitToRay);
 
         if (IsLeftRotation)
-            IsRotateToLeft?.Invoke(true);
-        else
-            IsRotateToLeft?.Invoke(false);
-
+            IsRotateToLeft?.Invoke();
+       
         if (IsRightRotation)
-            IsRotateToRight?.Invoke(true);
-        else
-            IsRotateToRight?.Invoke(false);
+            IsRotateToRight?.Invoke();
 
         if (IsPlaceFounded)
             Placed?.Invoke();

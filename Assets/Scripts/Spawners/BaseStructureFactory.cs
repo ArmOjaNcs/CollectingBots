@@ -54,6 +54,7 @@ public class BaseStructureFactory : MonoBehaviour
         }
 
         baseStructure.gameObject.SetActive(true);
+        baseStructure.Build();
 
         if (_botSpawner.TranslatableBotsCount > 0)
         {
@@ -64,7 +65,6 @@ public class BaseStructureFactory : MonoBehaviour
 
         baseStructure.NeedNewBot += _botSpawner.AddBotToBaseStructure;
         baseStructure.BuildNewBase += OnBuildNewBase;
-        baseStructure.Build();
 
         return baseStructure;
     }
