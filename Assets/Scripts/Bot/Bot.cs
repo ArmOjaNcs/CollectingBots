@@ -18,6 +18,8 @@ public class Bot : ObjectToSpawn
     private bool _isDelivered;
 
     public event Action Ride;
+    public event Action Pause;
+    public event Action Play;
     public event Action StopRide;
     public event Action<Bot> BuildStarted;
 
@@ -56,26 +58,16 @@ public class Bot : ObjectToSpawn
         _baseSructure = currentBaseStructure;
     }
 
-    public void SetUnBusy()
-    {
-        _agent.velocity = Vector3.zero;
-        IsBusy = false;
-        _baseStructureBuildView = null;
-        _agent.isStopped = true;
-        _resourceOnDeliver = null;
-        _isDelivered = true;
-    }
-
     public void SetBusy()
     {
         _isDelivered = false;
         _agent.isStopped = false;
         IsBusy = true;
+        Ride?.Invoke();
     }
 
     public void FollowToBuildNewBase(BaseStructureBuildView baseStructureBuildView)
     {
-        Ride?.Invoke();
         _baseStructureBuildView = baseStructureBuildView;
         _agent.destination = baseStructureBuildView.transform.position;
     }
@@ -83,7 +75,6 @@ public class Bot : ObjectToSpawn
     public void SetCurrentResourceDestination(Resource resource)
     {
         SetBusy();
-        Ride?.Invoke();
         _currentResourceTarget = resource;
         _agent.destination = resource.transform.position;
     }
@@ -96,7 +87,7 @@ public class Bot : ObjectToSpawn
             _velocity = _agent.velocity;
             _agent.velocity = Vector3.zero;
             _agent.isStopped = true;
-            StopRide?.Invoke();
+            Pause?.Invoke();
         }
     }
 
@@ -110,9 +101,19 @@ public class Bot : ObjectToSpawn
             if (_isDelivered == false)
             {
                 _agent.isStopped = false;
-                Ride?.Invoke();
+                Play?.Invoke();
             }
         }
+    }
+
+    private void SetUnBusy()
+    {
+        _agent.velocity = Vector3.zero;
+        IsBusy = false;
+        _agent.isStopped = true;
+        _resourceOnDeliver = null;
+        _isDelivered = true;
+        StopRide?.Invoke();
     }
 
     private void RecalculateDistanceToCurrentResource()
@@ -125,6 +126,7 @@ public class Bot : ObjectToSpawn
             {
                 _currentResourceTarget.transform.position = _grabPoint.transform.position;
                 _currentResourceTarget.transform.SetParent(_grabPoint);
+                _currentResourceTarget.DisableNavMeshObstacle();
                 _resourceOnDeliver = _currentResourceTarget;
                 _currentResourceTarget = null;
                 SetBaseStructureDestination();
@@ -149,19 +151,13 @@ public class Bot : ObjectToSpawn
         {
             _resourceOnDeliver.transform.parent = null;
             _baseSructure.CollectResource(_resourceOnDeliver);
-            _agent.velocity = Vector3.zero;
-            IsBusy = false;
-            _agent.isStopped = true;
-            _resourceOnDeliver = null;
-            _isDelivered = true;
-            StopRide?.Invoke();
+            SetUnBusy();
         }
     }
 
     private void SetBaseStructureDestination()
     {
         _agent.velocity = Vector3.zero;
-        Ride?.Invoke();
         _agent.destination = _baseSructure.transform.position;
     }
 
@@ -176,6 +172,7 @@ public class Bot : ObjectToSpawn
             {
                 _baseStructureBuildView = null;
                 SetUnBusy();
+                _baseStructureBuildView = null;
                 BuildStarted?.Invoke(this);
             }
         }

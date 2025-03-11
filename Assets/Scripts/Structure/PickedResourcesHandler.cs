@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 public class PickedResourcesHandler 
 {
@@ -9,15 +10,11 @@ public class PickedResourcesHandler
         _pickedResources.Add(resource);
     }
 
-    public HashSet<Resource> GetAvailableResources(HashSet<Resource> resources)
+    public IEnumerable<Resource> GetAvailableResources(HashSet<Resource> resources)
     {
-        HashSet<Resource> availableResources = new();
-
-        foreach(Resource resource in resources)
-        {
-            if(_pickedResources.Contains(resource) == false)
-                availableResources.Add(resource);
-        }
+        IEnumerable<Resource> availableResources = from resource in resources
+                              where _pickedResources.Contains(resource) == false
+                              select resource;
        
         return availableResources;
     }

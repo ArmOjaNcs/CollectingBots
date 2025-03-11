@@ -29,6 +29,8 @@ NavMeshProjectSettings:
     cost: 1
   - name: 
     cost: 1
+  - name: Ground
+    cost: 1000
   - name: 
     cost: 1
   - name: 
@@ -45,10 +47,8 @@ NavMeshProjectSettings:
     cost: 1
   - name: 
     cost: 1
-  - name: 
-    cost: 1
-  - name: 
-    cost: 1
+  - name: Base
+    cost: 10
   - name: 
     cost: 1
   - name: 

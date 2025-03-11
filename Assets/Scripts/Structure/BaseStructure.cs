@@ -166,31 +166,29 @@ public class BaseStructure : ObjectToSpawn
 
     private void Scan()
     {
-        List<Resource> availableResources = new();
-        availableResources = _pickedResourcesHandler.GetAvailableResources(_scanner.ScanArea()).ToList();
-        AvailableResourcesCount = availableResources.Count;
+        IEnumerable<Resource> availableResources = _pickedResourcesHandler.GetAvailableResources(_scanner.ScanArea());
+        AvailableResourcesCount = availableResources.Count<Resource>();
         AvailableResourcesCountChanged?.Invoke(AvailableResourcesCount);
-
         SendBot(availableResources);
     }
 
-    private void SendBot(List<Resource> availableResources)
+    private void SendBot(IEnumerable<Resource> availableResources)
     {
-        if (availableResources.Count > 0)
+        if (availableResources.Count<Resource>() > 0)
         {
             Bot bot = GetFreeBot();
             Resource nearestResource = null;
 
             if (bot != null && bot.isActiveAndEnabled)
             {
-                for (int i = 0; i < availableResources.Count; i++)
+                for (int i = 0; i < availableResources.Count<Resource>(); i++)
                 {
-                    float distance = Vector3.Distance(availableResources[i].transform.position, transform.position);
+                    float distance = Vector3.Distance(availableResources.ElementAt(i).transform.position, transform.position);
                    
                     if (distance < _nearestPosition)
                     {
                         _nearestPosition = distance;
-                        nearestResource = availableResources[i];
+                        nearestResource = availableResources.ElementAt(i);
                     }
                 }
 
